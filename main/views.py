@@ -1,12 +1,30 @@
 from django.shortcuts import render
-import django_filters.rest_framework
-from .models import FoodCategory, Topping, Food
+from django_filters import rest_framework as filters
+from .models import Category, Topping, Food
 from .serializers import FoodCategorySerializer, ToppingSerializer, FoodSerializer
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 
 
+class FoodFilter(filters.FilterSet):
+    vegan = filters.BooleanFilter(field_name='is_vegan')
+    special = filters.BooleanFilter(field_name='is_special')
+    publish = filters.BooleanFilter(field_name='is_publish')
+
+    class Meta:
+        model = Food
+        filter_fields = ['is_vegan', 'is_special', 'is_publish']
+
+
+class CategoryFilter(filters.FilterSet):
+    published = filters.BooleanFilter(field_name='is_publish')
+
+    class Meta:
+        model = Category
+        filter_fields = ['is_publish']
+
+
 class FoodCategoryAPIView(CreateAPIView):
-    queryset = FoodCategory.objects.all()
+    queryset = Category.objects.all()
     serializer_class = FoodCategorySerializer
 
 
@@ -21,10 +39,10 @@ class FoodAPIView(CreateAPIView):
 
 
 class FoodCategoryListAPIView(ListAPIView):
-    queryset = FoodCategory.objects.all()
+    queryset = Category.objects.all()
     serializer_class = FoodCategorySerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['name', 'is_publish', 'is_vegan', 'is_special']
+    filter_backends = [filters.DjangoFilterBackend]
+    filterset_fields = FoodFilter, CategoryFilter
 
 
 class ToppingListAPIView(ListAPIView):
@@ -39,7 +57,7 @@ class FoodListAPIView(ListAPIView):
 
 
 class FoodCategoryDetailAPIView(RetrieveAPIView):
-    queryset = FoodCategory.objects.all()
+    queryset = Category.objects.all()
     serializer_class = FoodCategorySerializer
 
 
